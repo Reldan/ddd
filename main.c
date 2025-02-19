@@ -1,101 +1,116 @@
-#define SDL_DISABLE_IMMINTRIN_H 1  // Disable x86 specific headers
 #include <SDL2/SDL.h>
+
 #include <stdio.h>
 #include <stdbool.h>
 
-#define WINDOW_WIDTH 1024
-#define WINDOW_HEIGHT 768
-#define GAME_TITLE "Doom Clone"
+// Define MAX and MIN macros
+#define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
+#define MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
 
-// Global variables for our window and renderer
-SDL_Window* window = NULL;
-SDL_Renderer* renderer = NULL;
+// Define screen dimensions
+#define SCREEN_WIDTH    800
+#define SCREEN_HEIGHT   600
 
-// Initialize SDL and create window/renderer
-bool initialize() {
-    // Initialize SDL with required subsystems
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_EVENTS) < 0) {
-        printf("SDL initialization failed: %s\n", SDL_GetError());
-        return false;
+int main(int argc, char* argv[])
+{
+    // Unused argc, argv
+    (void) argc;
+    (void) argv;
+
+    // Initialize SDL
+    if(SDL_Init(SDL_INIT_VIDEO) < 0)
+    {
+        printf("SDL could not be initialized!\n"
+               "SDL_Error: %s\n", SDL_GetError());
+        return 0;
     }
 
-    // Set up hint for Metal rendering
-    SDL_SetHint(SDL_HINT_RENDER_DRIVER, "metal");
+#if defined linux && SDL_VERSION_ATLEAST(2, 0, 8)
+    // Disable compositor bypass
+    if(!SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0"))
+    {
+        printf("SDL can not disable compositor bypass!\n");
+        return 0;
+    }
+#endif
 
     // Create window
-    window = SDL_CreateWindow(
-        GAME_TITLE,
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-        WINDOW_WIDTH, WINDOW_HEIGHT,
-        SDL_WINDOW_SHOWN
-    );
-
-    if (!window) {
-        printf("Window creation failed: %s\n", SDL_GetError());
-        return false;
+    SDL_Window *window = SDL_CreateWindow("Basic C SDL project",
+                                          SDL_WINDOWPOS_UNDEFINED,
+                                          SDL_WINDOWPOS_UNDEFINED,
+                                          SCREEN_WIDTH, SCREEN_HEIGHT,
+                                          SDL_WINDOW_SHOWN);
+    if(!window)
+    {
+        printf("Window could not be created!\n"
+               "SDL_Error: %s\n", SDL_GetError());
     }
+    else
+    {
+        // Create renderer
+        SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+        if(!renderer)
+        {
+            printf("Renderer could not be created!\n"
+                   "SDL_Error: %s\n", SDL_GetError());
+        }
+        else
+        {
+            // Declare rect of square
+            SDL_Rect squareRect;
 
-    // Create renderer optimized for Metal
-    renderer = SDL_CreateRenderer(
-        window,
-        -1,
-        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-    );
+            // Square dimensions: Half of the min(SCREEN_WIDTH, SCREEN_HEIGHT)
+            squareRect.w = MIN(SCREEN_WIDTH, SCREEN_HEIGHT) / 2;
+            squareRect.h = MIN(SCREEN_WIDTH, SCREEN_HEIGHT) / 2;
 
-    if (!renderer) {
-        printf("Renderer creation failed: %s\n", SDL_GetError());
-        return false;
-    }
+            // Square position: In the middle of the screen
+            squareRect.x = SCREEN_WIDTH / 2 - squareRect.w / 2;
+            squareRect.y = SCREEN_HEIGHT / 2 - squareRect.h / 2;
 
-    return true;
-}
 
-// Cleanup function
-void cleanup() {
-    if (renderer) {
-        SDL_DestroyRenderer(renderer);
-    }
-    if (window) {
-        SDL_DestroyWindow(window);
-    }
-    SDL_Quit();
-}
+            // Event loop exit flag
+            bool quit = false;
 
-int main(int argc, char* argv[]) {
-    // Initialize game
-    if (!initialize()) {
-        cleanup();
-        return 1;
-    }
+            // Event loop
+            while(!quit)
+            {
+                SDL_Event e;
 
-    bool running = true;
-    SDL_Event event;
+                // Wait indefinitely for the next available event
+                SDL_WaitEvent(&e);
 
-    // Main game loop
-    while (running) {
-        // Handle events
-        while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT) {
-                running = false;
-            }
-            else if (event.type == SDL_KEYDOWN) {
-                if (event.key.keysym.sym == SDLK_ESCAPE) {
-                    running = false;
+                // User requests quit
+                if(e.type == SDL_QUIT)
+                {
+                    quit = true;
                 }
+
+                // Initialize renderer color white for the background
+                SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
+
+                // Clear screen
+                SDL_RenderClear(renderer);
+
+                // Set renderer color red to draw the square
+                SDL_SetRenderDrawColor(renderer, 0xFF, 0x00, 0x00, 0xFF);
+
+                // Draw filled square
+                SDL_RenderFillRect(renderer, &squareRect);
+
+                // Update screen
+                SDL_RenderPresent(renderer);
             }
+
+            // Destroy renderer
+            SDL_DestroyRenderer(renderer);
         }
 
-        // Clear screen
-        SDL_SetRenderDrawColor(renderer, 100, 0, 0, 255);
-        SDL_RenderClear(renderer);
-
-        // TODO: Add game rendering code here
-
-        // Present renderer
-        SDL_RenderPresent(renderer);
+        // Destroy window
+        SDL_DestroyWindow(window);
     }
 
-    // Cleanup and exit
-    cleanup();
+    // Quit SDL
+    SDL_Quit();
+
     return 0;
 }
