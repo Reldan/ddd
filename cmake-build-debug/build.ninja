@@ -49,8 +49,8 @@ cmake_ninja_workdir = /Users/reldan/CLionProjects/ddd/cmake-build-debug/
 
 build cmake_object_order_depends_target_ddd: phony || .
 
-build CMakeFiles/ddd.dir/main.c.o: C_COMPILER__ddd_unscanned_Debug /Users/reldan/CLionProjects/ddd/main.c || cmake_object_order_depends_target_ddd
-  DEP_FILE = CMakeFiles/ddd.dir/main.c.o.d
+build CMakeFiles/ddd.dir/main_old.c.o: C_COMPILER__ddd_unscanned_Debug /Users/reldan/CLionProjects/ddd/main_old.c || cmake_object_order_depends_target_ddd
+  DEP_FILE = CMakeFiles/ddd.dir/main_old.c.o.d
   FLAGS = -g -std=gnu11 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -fcolor-diagnostics
   INCLUDES = -I/usr/local/Cellar/sdl2/2.32.0/include -isystem /usr/local/Cellar/sdl2/2.32.0/include/SDL2
   OBJECT_DIR = CMakeFiles/ddd.dir
@@ -64,7 +64,7 @@ build CMakeFiles/ddd.dir/main.c.o: C_COMPILER__ddd_unscanned_Debug /Users/reldan
 #############################################
 # Link the executable ddd
 
-build ddd: C_EXECUTABLE_LINKER__ddd_Debug CMakeFiles/ddd.dir/main.c.o | /usr/local/Cellar/sdl2/2.32.0/lib/libSDL2.dylib
+build ddd: C_EXECUTABLE_LINKER__ddd_Debug CMakeFiles/ddd.dir/main_old.c.o | /usr/local/Cellar/sdl2/2.32.0/lib/libSDL2.dylib
   FLAGS = -g -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
   LINK_LIBRARIES = -Wl,-rpath,/usr/local/Cellar/sdl2/2.32.0/lib  /usr/local/Cellar/sdl2/2.32.0/lib/libSDL2.dylib
   LINK_PATH = -L/usr/local/Cellar/sdl2/2.32.0/lib
